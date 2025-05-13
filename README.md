@@ -9,3 +9,7 @@ See [`".github/workflows/run.yml"`](https://github.com/sifferman/ngspice_example
 
 * Sky130 PDK via [Ciel](https://github.com/fossi-foundation/ciel)
 * [Ngspice](https://ngspice.sourceforge.io/)
+
+## References
+
+* <https://ngspice.sourceforge.io/docs/ngspice-html-manual/manual.xhtml>
