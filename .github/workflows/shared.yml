@@ -1,0 +1,60 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build-and-release:
+    env:
+      tools: ${{ github.workspace }}/tools
+      git: ${{ github.workspace }}/git
+      ngspice: ${{ github.workspace }}/ngspice-install
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Create build dirs
+        run: |
+          mkdir -p ${{ env.tools }}
+          mkdir -p ${{ env.git }}
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3
+          sudo apt-get install -y tk-dev libxpm-dev tcl-dev libx11-dev flex libtool-bin libxaw7-dev libreadline6-dev libcairo2-dev m4 tcsh
+
+      - name: Install ngspice
+        run: |
+          cd ngspice
+          mkdir -p build
+          ./autogen.sh
+          cd build
+          ../configure \
+            --prefix=${{ env.ngspice }} \
+            --enable-xspice \
+            --with-ngshared \
+            --enable-cider \
+            CFLAGS="-g -m64 -O0 -Wall" LDFLAGS="-m64 -g"
+          make -j`nproc`
+          make install
+          echo "${{ env.ngspice }}/ngspice/bin" >> $GITHUB_PATH
+
+      - name: Generate PDK files
+        run: |
+          cd ${{ env.tools }}
+          python3 -m venv ciel-venv
+          ciel-venv/bin/python3 -m pip install --upgrade --no-cache-dir ciel
+          export PDK_ROOT=${{ env.tools }}/ciel-pdks
+          ciel-venv/bin/ciel ls-remote --pdk-family sky130
+          # https://github.com/RTimothyEdwards/open_pdks/tree/0fe599b2afb6708d281543108caf8310912f54af
+          ciel-venv/bin/ciel enable --pdk-family sky130 0fe599b2afb6708d281543108caf8310912f54af
+
+      - name: Run ngspice
+        run: |
+          make run
