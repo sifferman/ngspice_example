@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
       - name: Create build dirs
         run: |
@@ -28,8 +30,6 @@ jobs:
 
       - name: Install ngspice
         run: |
-          mkdir -p ${{ env.git }}
-          git clone --depth 1 git://git.code.sf.net/p/ngspice/ngspice
           cd ngspice
           mkdir -p build
           ./autogen.sh
@@ -39,10 +39,7 @@ jobs:
             --with-x \
             --enable-xspice \
             --disable-debug \
-            --enable-cider \
-            --with-readline=yes \
-            --enable-openmp \
-            --enable-osdi
+            --with-readline=yes
           make -j`nproc`
           make install
           echo "${{ env.tools }}/ngspice/bin" >> $GITHUB_PATH

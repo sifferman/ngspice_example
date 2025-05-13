@@ -11,7 +11,6 @@ jobs:
     env:
       tools: ${{ github.workspace }}/tools
       git: ${{ github.workspace }}/git
-      ngspice: ${{ github.workspace }}/ngspice-install
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -36,14 +35,13 @@ jobs:
           ./autogen.sh
           cd build
           ../configure \
-            --prefix=${{ env.ngspice }} \
-            --enable-xspice \
+            --prefix=${{ env.tools }}/ngspice \
             --with-ngshared \
-            --enable-cider \
+            --enable-xspice \
             CFLAGS="-g -m64 -O0 -Wall" LDFLAGS="-m64 -g"
           make -j`nproc`
           make install
-          echo "${{ env.ngspice }}/ngspice/bin" >> $GITHUB_PATH
+          echo "${{ env.tools }}/ngspice/bin" >> $GITHUB_PATH
 
       - name: Generate PDK files
         run: |
@@ -57,4 +55,5 @@ jobs:
 
       - name: Run ngspice
         run: |
-          make run
+          export PDK_ROOT=${{ env.tools }}/ciel-pdks
+          make run NGSPICE_ROOT=${{ env.tools }}/ngspice
