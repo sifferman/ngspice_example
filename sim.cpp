@@ -1,50 +1,40 @@
 
 #include <thread>
-#include <chrono>
 #include <iostream>
 #include <vector>
 #include <string>
-#include <cstdlib>
 #include <cmath>
-#include <filesystem>
 #include "sharedspice.h"
 
-//— Callback to capture printf/fprintf output from ngspice
+// Stdout from from ngspice
 int cb_SendChar(char* msg, int /*id*/, void* /*ud*/) {
     std::cout << msg << std::endl;
     return 0;
 }
 
-//— Required controlled-exit callback
+// Handle Ngspice "quit" signal
 int cb_ControlledExit(int status, NG_BOOL /*immed*/, NG_BOOL /*quit*/, int /*id*/, void* /*ud*/) {
     std::cerr << "[ngspice exit] status=" << status << std::endl;
     std::exit(status);
 }
 
-//— Simple bg-thread indicator (unused here)
-int cb_BgRunning(NG_BOOL /*running*/, int /*id*/, void* /*ud*/) {
-    return 0;
-}
+int cb_BgRunning(NG_BOOL /*running*/, int /*id*/, void* /*ud*/) { return 0; }
 
-//— This will be called by ngspice whenever it needs the value of an EXTERNAL voltage source.
-//  We use it to drive our two “digital” nodes CLK_DIGITAL and D_DIGITAL via the DAC bridge.
+// Used to drive EXTERNAL voltage sources
 int cb_GetVSRCData(double* value, double time, char* nodeName, int /*id*/, void* /*ud*/) {
     std::string nm(nodeName);
     if (nm == "vclk_digital") {
         double phase = std::fmod(time, 1e-9);
         *value = (phase < 0.5e-9 ? 0.0 : 1.8);
-    }
-    else if (nm == "D_DIGITAL") {
-        // A simple pulse: low for first half, then high
+    } else if (nm == "vd_digital") {
         *value = (time < 5e-9 ? 0.0 : 1.8);
-    }
-    else {
-        *value = 0.0;  // default
+    } else { // default
+        *value = 0.0;
     }
     return 0;
 }
 
-//— Optional: capture each data point and print node Q
+// Print out data from Ngspice
 int cb_SendData(pvecvaluesall allvals, int /*count*/, int /*id*/, void* /*ud*/) {
     double time = NAN;
     double clk = NAN;
@@ -62,11 +52,10 @@ int cb_SendData(pvecvaluesall allvals, int /*count*/, int /*id*/, void* /*ud*/) 
     return 0;
 }
 
-//— We don’t need the vector-info callback for this example
 int cb_SendInitData(pvecinfoall, int, void*) { return 0; }
 
 int main() {
-    // 1) Initialize ngspice with our callbacks
+    // ngspice initialization
     ngSpice_Init(
         cb_SendChar,
         nullptr,               // SendStat
@@ -77,7 +66,7 @@ int main() {
         nullptr                // userData
     );
 
-    // 2) Register the synchronous external-source callback
+    // initialization of synchronizing functions
     int uniq_id = 0;
     ngSpice_Init_Sync(
         cb_GetVSRCData,
@@ -98,11 +87,13 @@ int main() {
     tb.push_back("VVPB  VPB  0 1.8");
     tb.push_back("VVPWR VPWR 0 1.8");
     tb.push_back("");
+    tb.push_back("VCLK_DIGITAL CLK_DIGITAL 0 DC 0 EXTERNAL");
+    tb.push_back("VD_DIGITAL   D_DIGITAL   0 DC 0 EXTERNAL");
+    tb.push_back("");
     tb.push_back(".model dac_model dac_bridge(out_low=0 out_high=1.8 t_rise=2e-11 t_fall=2e-11)");
     tb.push_back("a_dac_bridge1 [CLK_DIGITAL] [CLK] dac_model");
     tb.push_back("a_dac_bridge2 [D_DIGITAL]   [D]   dac_model");
     tb.push_back("");
-    tb.push_back(".tran 1n 20n");
     tb.push_back(".end");
     for (const auto & l : tb)
         std::cout << l << std::endl;
@@ -112,7 +103,6 @@ int main() {
         return 1;
     }
 
-    // 7) Kick off the transient analysis
     ngSpice_Command((char*)"tran 1n 20n");
 
     while (ngSpice_running()) {
