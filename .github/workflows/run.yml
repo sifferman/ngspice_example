@@ -1,4 +1,4 @@
-name: Build
+name: Demonstrate Binary
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 permissions:
   contents: write
 jobs:
-  build-and-release:
+  demonstrate-binary:
     env:
       tools: ${{ github.workspace }}/tools
       git: ${{ github.workspace }}/git
