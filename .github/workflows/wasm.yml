@@ -52,10 +52,10 @@ jobs:
         run: |
           source ${{ env.git }}/emsdk/emsdk_env.sh
           em++ sim.cpp \
-            -s SIDE_MODULE=1 \
+            -s MAIN_MODULE=1 \
             -I ngspice/src/include/ngspice \
             libngspice.so \
-            -o sim.js
+            -o sim.html
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
