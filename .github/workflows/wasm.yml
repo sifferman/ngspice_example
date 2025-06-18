@@ -63,7 +63,7 @@ jobs:
             -s MAIN_MODULE=1 \
             libngspice.so \
             -o sim.html \
-            --preload-file sky130_fd_sc_hd__dfxtp_1.spice
+            --preload-file ./sky130_fd_sc_hd__dfxtp_1.spice@/sky130_fd_sc_hd__dfxtp_1.spice
 
       - name: Create web branch
         run: |
