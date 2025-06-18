@@ -30,6 +30,7 @@ jobs:
           ./emsdk install latest
           ./emsdk activate latest
           source ./emsdk_env.sh
+          sudo apt install wabt
 
       - name: Download Ngspice WASM from Pyodide
         run: |
@@ -37,6 +38,8 @@ jobs:
           mkdir -p pyodide_pkgs
           tar -xzf packages.tar.gz -C pyodide_pkgs
           unzip pyodide_pkgs/ngspice-44.2.zip
+          ls libngspice.so
+          wasm-objdump -x libngspice.so
 
       - name: Generate PDK files
         run: |
