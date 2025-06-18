@@ -82,12 +82,12 @@ jobs:
           mv sim.html docs/index.html
           mv sim.js docs/
           mv sim.wasm docs/
-          git rm ngspice --force
 
       - name: Commit
         run: |
           if [[ -n "$(git status --porcelain)" ]]; then
             git add docs ngspice
+            git rm ngspice --force
             git commit -m "created web files from ${{ steps.gethash.outputs.hash }}"
             git push origin web --force
           else
