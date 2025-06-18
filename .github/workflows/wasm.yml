@@ -55,7 +55,8 @@ jobs:
         run: |
           source ${{ env.git }}/emsdk/emsdk_env.sh
           em++ sim.cpp \
-            -s MAIN_MODULE=1 \
+            -s SUPPORT_LONGJMP=emscripten \
+            -fexceptions \
             -I ngspice/src/include/ngspice \
             libngspice.so \
             -o sim.html
