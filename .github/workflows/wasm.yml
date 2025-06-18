@@ -53,7 +53,8 @@ jobs:
         run: |
           source ${{ env.git }}/emsdk/emsdk_env.sh
           em++ sim.cpp \
-            -s SUPPORT_LONGJMP=emscripten \
+            -s SUPPORT_LONGJMP=wasm \
+            -fwasm-exceptions \
             -fexceptions \
             -I ngspice/src/include/ngspice \
             -s MAIN_MODULE=1 \
