@@ -15,6 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          submodules: recursive
           fetch-depth: 0
 
       - name: Create build dirs
@@ -52,7 +53,7 @@ jobs:
           source ${{ env.git }}/emsdk/emsdk_env.sh
           em++ sim.cpp \
             -s SIDE_MODULE=1 \
-            -I pyodide_pkgs/ngspice-44.2/include \
+            -I ngspice/src/include/ngspice \
             libngspice.so \
             -o sim.js
 
