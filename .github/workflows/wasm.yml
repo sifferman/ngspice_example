@@ -79,7 +79,7 @@ jobs:
       - name: Prepare files
         run: |
           mkdir -p docs
-          mv sim.html docs/
+          mv sim.html docs/index.html
           mv sim.js docs/
           mv sim.wasm docs/
 
