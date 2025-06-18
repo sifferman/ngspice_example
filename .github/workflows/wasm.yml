@@ -64,6 +64,7 @@ jobs:
             libngspice.so \
             -o sim.html \
             --preload-file ./sky130_fd_sc_hd__dfxtp_1.spice@/sky130_fd_sc_hd__dfxtp_1.spice
+          ls
 
       - name: Create web branch
         run: |
@@ -75,6 +76,8 @@ jobs:
           mv sim.html docs/index.html
           mv sim.js docs/
           mv sim.wasm docs/
+          mv sim.data docs/
+          mv sim.data.js docs/
           mv libngspice.so docs/
           cp sky130_fd_sc_hd__dfxtp_1.spice docs/
 
