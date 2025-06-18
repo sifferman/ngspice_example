@@ -74,6 +74,7 @@ jobs:
           mv sim.js docs/
           mv sim.wasm docs/
           mv libngspice.so docs/
+          cp sky130_fd_sc_hd__dfxtp_1.spice docs/
 
       - name: Commit
         run: |
