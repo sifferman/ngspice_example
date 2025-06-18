@@ -55,6 +55,7 @@ jobs:
         run: |
           source ${{ env.git }}/emsdk/emsdk_env.sh
           em++ sim.cpp \
+            -s EXPORTED_RUNTIME_METHODS=["FS"] \
             -s SUPPORT_LONGJMP=wasm \
             -fwasm-exceptions \
             -fexceptions \
