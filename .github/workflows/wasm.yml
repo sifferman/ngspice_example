@@ -17,6 +17,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Create build dirs
+        run: |
+          mkdir -p ${{ env.tools }}
+          mkdir -p ${{ env.git }}
+
       - name: Install Emscripten
         run: |
           git clone https://github.com/emscripten-core/emsdk.git ${{ env.git }}/emsdk
