@@ -38,8 +38,7 @@ jobs:
           ../configure \
             --prefix=${{ env.tools }}/ngspice \
             --with-ngshared \
-            --enable-xspice \
-            CFLAGS="-g -m64 -O0 -Wall" LDFLAGS="-m64 -g"
+            --enable-xspice
           make -j`nproc`
           make install
           echo "${{ env.tools }}/ngspice/bin" >> $GITHUB_PATH
