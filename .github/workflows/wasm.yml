@@ -62,6 +62,7 @@ jobs:
         with:
           name: emscripten-sim
           path: |
+            sim.html
             sim.js
             sim.wasm
             libngspice.so
