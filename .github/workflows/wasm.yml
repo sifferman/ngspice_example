@@ -9,7 +9,8 @@ permissions:
 jobs:
   demonstrate-wasm-shared-library:
     env:
-      EMSDK: ${{ github.workspace }}/emsdk
+      tools: ${{ github.workspace }}/tools
+      git: ${{ github.workspace }}/git
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,8 +19,8 @@ jobs:
 
       - name: Install Emscripten
         run: |
-          git clone https://github.com/emscripten-core/emsdk.git $EMSDK
-          cd $EMSDK
+          git clone https://github.com/emscripten-core/emsdk.git ${{ env.git }}/emsdk
+          cd ${{ env.git }}/emsdk
           ./emsdk install latest
           ./emsdk activate latest
           source ./emsdk_env.sh
@@ -43,7 +44,7 @@ jobs:
 
       - name: Compile C++ sim with Emscripten + ngspice WASM
         run: |
-          source $EMSDK/emsdk_env.sh
+          source ${{ env.git }}/emsdk/emsdk_env.sh
           em++ sim.cpp \
             -s SIDE_MODULE=1 \
             -I pyodide_pkgs/ngspice-44.2/include \
