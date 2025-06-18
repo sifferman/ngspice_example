@@ -63,15 +63,6 @@ jobs:
             libngspice.so \
             -o sim.html
 
-      - name: Set up Git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Save commit hash
-        id: gethash
-        run: echo "hash=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-
       - name: Create web branch
         run: |
           git checkout -B web
@@ -82,13 +73,16 @@ jobs:
           mv sim.html docs/index.html
           mv sim.js docs/
           mv sim.wasm docs/
+          mv libngspice.so docs/
 
       - name: Commit
         run: |
           if [[ -n "$(git status --porcelain)" ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
             git add docs ngspice
             git rm ngspice --force
-            git commit -m "created web files from ${{ steps.gethash.outputs.hash }}"
+            git commit -m "created web files from $(git rev-parse --short HEAD)"
             git push origin web --force
           else
             echo "No changes to commit."
