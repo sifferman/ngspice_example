@@ -1,0 +1,60 @@
+name: Demonstrate WASM Shared Library
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  demonstrate-wasm-shared-library:
+    env:
+      EMSDK: ${{ github.workspace }}/emsdk
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Emscripten
+        run: |
+          git clone https://github.com/emscripten-core/emsdk.git $EMSDK
+          cd $EMSDK
+          ./emsdk install latest
+          ./emsdk activate latest
+          source ./emsdk_env.sh
+
+      - name: Download Ngspice WASM from Pyodide
+        run: |
+          wget https://github.com/pyodide/pyodide-recipes/releases/download/20250606/packages.tar.gz
+          mkdir -p pyodide_pkgs
+          tar -xzf packages.tar.gz -C pyodide_pkgs
+          unzip pyodide_pkgs/ngspice-44.2.zip
+
+      - name: Generate PDK files
+        run: |
+          cd ${{ env.tools }}
+          python3 -m venv ciel-venv
+          ciel-venv/bin/python3 -m pip install --upgrade --no-cache-dir ciel
+          export PDK_ROOT=${{ env.tools }}/ciel-pdks
+          ciel-venv/bin/ciel ls-remote --pdk-family sky130
+          # https://github.com/RTimothyEdwards/open_pdks/tree/0fe599b2afb6708d281543108caf8310912f54af
+          ciel-venv/bin/ciel enable --pdk-family sky130 0fe599b2afb6708d281543108caf8310912f54af
+
+      - name: Compile C++ sim with Emscripten + ngspice WASM
+        run: |
+          source $EMSDK/emsdk_env.sh
+          em++ sim.cpp \
+            -s SIDE_MODULE=1 \
+            -I pyodide_pkgs/ngspice-44.2/include \
+            libngspice.so \
+            -o sim.js
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: emscripten-sim
+          path: |
+            sim.js
+            sim.wasm
+            libngspice.so
